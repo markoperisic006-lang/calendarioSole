@@ -5,12 +5,11 @@
         Height="780" Width="1240" MinHeight="660" MinWidth="1020"
         Background="#181820" WindowStartupLocation="CenterScreen"
         FontFamily="Segoe UI" Language="es-ES"
-        PreviewKeyDown="Window_PreviewKeyDown"
-        PreviewMouseWheel="Window_PreviewMouseWheel">
+        PreviewKeyDown="Window_PreviewKeyDown">
 
     <Window.Resources>
 
-        <!-- Botón redondeado: el color se pone con Background en cada botón -->
+        <!-- Estilo de los botones: esquinas redondeadas; el color se pone con Background en cada botón -->
         <Style x:Key="Boton" TargetType="Button">
             <Setter Property="Foreground" Value="White"/>
             <Setter Property="FontSize" Value="14"/>
@@ -38,35 +37,11 @@
                 </Setter.Value>
             </Setter>
         </Style>
-
-        <!-- Elementos de la lista de bloqueos -->
-        <Style x:Key="ItemLista" TargetType="ListBoxItem">
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="ListBoxItem">
-                        <Border x:Name="Bd" Background="Transparent" CornerRadius="8"
-                                Margin="0,2" Padding="12,8" Cursor="Hand">
-                            <ContentPresenter/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Bd" Property="Background" Value="#272837"/>
-                            </Trigger>
-                            <Trigger Property="IsSelected" Value="True">
-                                <Setter TargetName="Bd" Property="Background" Value="#33355A"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
     </Window.Resources>
 
     <Grid>
 
-        <!-- =====================================================
-             PANTALLA PRINCIPAL
-             ===================================================== -->
+        <!-- Pantalla principal: calendario a todo el ancho -->
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
@@ -74,13 +49,9 @@
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="320"/>
-            </Grid.ColumnDefinitions>
 
-            <!-- Barra superior: navegación (izquierda) + leyenda 2x2 (derecha) -->
-            <Grid Grid.Row="0" Grid.Column="0" Margin="20,16,24,8">
+            <!-- Flechas para cambiar de mes (izquierda) y leyenda de colores (derecha) -->
+            <Grid Grid.Row="0" Margin="24,16,28,8">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="*"/>
@@ -90,12 +61,10 @@
                 <StackPanel Grid.Column="0" Orientation="Horizontal">
                     <Button Style="{StaticResource Boton}" Background="#20212C" Content="‹"
                             FontSize="22" Width="46" Height="42" Click="BtnPrev_Click"/>
-                    <TextBlock x:Name="TxtMes" Width="260" TextAlignment="Center" VerticalAlignment="Center"
+                    <TextBlock x:Name="TxtMes" Width="270" TextAlignment="Center" VerticalAlignment="Center"
                                FontSize="26" FontWeight="Bold" Foreground="#EBECF5"/>
                     <Button Style="{StaticResource Boton}" Background="#20212C" Content="›"
                             FontSize="22" Width="46" Height="42" Click="BtnNext_Click"/>
-                    <Button Style="{StaticResource Boton}" Background="#6366F1" Content="Hoy"
-                            Width="84" Height="42" Margin="14,0,0,0" Click="BtnHoy_Click"/>
                 </StackPanel>
 
                 <UniformGrid Grid.Column="2" Columns="2" Rows="2" VerticalAlignment="Center">
@@ -118,8 +87,8 @@
                 </UniformGrid>
             </Grid>
 
-            <!-- Cabecera de días de la semana -->
-            <UniformGrid Grid.Row="1" Grid.Column="0" Columns="7" Margin="14,4,14,4">
+            <!-- Nombres de los días de la semana -->
+            <UniformGrid Grid.Row="1" Columns="7" Margin="18,4,18,4">
                 <TextBlock Text="LUN" TextAlignment="Center" Foreground="#8C8FA5" FontWeight="Bold" FontSize="12"/>
                 <TextBlock Text="MAR" TextAlignment="Center" Foreground="#8C8FA5" FontWeight="Bold" FontSize="12"/>
                 <TextBlock Text="MIÉ" TextAlignment="Center" Foreground="#8C8FA5" FontWeight="Bold" FontSize="12"/>
@@ -129,62 +98,16 @@
                 <TextBlock Text="DOM" TextAlignment="Center" Foreground="#6366F1" FontWeight="Bold" FontSize="12"/>
             </UniformGrid>
 
-            <!-- Las 42 celdas se crean en el código -->
-            <UniformGrid x:Name="DiasGrid" Grid.Row="2" Grid.Column="0" Rows="6" Columns="7" Margin="14,0,14,10"/>
+            <!-- Las 42 celdas de los días se crean desde el código (ConstruirCeldas) -->
+            <UniformGrid x:Name="DiasGrid" Grid.Row="2" Rows="6" Columns="7" Margin="18,0,18,10"/>
 
-            <!-- Panel derecho (alto, como en el dibujo) -->
-            <Border Grid.Row="0" Grid.RowSpan="3" Grid.Column="1" Background="#20212C">
-                <Grid Margin="18">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
-
-                    <StackPanel Grid.Row="0">
-                        <TextBlock Text="Selección" Foreground="#8C8FA5" FontSize="13"/>
-                        <TextBlock x:Name="TxtSel" Foreground="#EBECF5" FontSize="14" FontWeight="SemiBold"
-                                   TextWrapping="Wrap" Margin="0,6,0,0" MinHeight="40"/>
-                        <TextBlock Text="Haz clic en un día (o arrastra / Shift+clic para un rango) para abrir la ventana de bloqueo. Con la rueda del ratón cambias de mes."
-                                   Foreground="#6F7188" FontSize="11.5" TextWrapping="Wrap" Margin="0,8,0,0"/>
-                    </StackPanel>
-
-                    <TextBlock Grid.Row="1" Text="Días bloqueados" Foreground="#8C8FA5" FontSize="13" Margin="0,22,0,8"/>
-
-                    <ListBox x:Name="ListaBloqueos" Grid.Row="2" Background="Transparent" BorderThickness="0"
-                             ItemContainerStyle="{StaticResource ItemLista}"
-                             SelectionChanged="ListaBloqueos_SelectionChanged">
-                        <ListBox.ItemTemplate>
-                            <DataTemplate>
-                                <StackPanel Orientation="Horizontal">
-                                    <Border Width="10" Height="10" CornerRadius="5" Background="{Binding Color}"
-                                            VerticalAlignment="Center" Margin="0,0,12,0"/>
-                                    <StackPanel>
-                                        <TextBlock Text="{Binding Rango}" Foreground="#EBECF5" FontSize="13" FontWeight="SemiBold"/>
-                                        <TextBlock Text="{Binding Tipo}" Foreground="#8C8FA5" FontSize="11"/>
-                                    </StackPanel>
-                                </StackPanel>
-                            </DataTemplate>
-                        </ListBox.ItemTemplate>
-                    </ListBox>
-
-                    <Button x:Name="BtnDesbloquear" Grid.Row="3" Style="{StaticResource Boton}"
-                            Background="#E14040" Content="Desbloquear" Height="46" Margin="0,14,0,0"
-                            IsEnabled="False" Click="BtnDesbloquear_Click"/>
-                </Grid>
-            </Border>
-
-            <!-- Barra de estado -->
-            <TextBlock x:Name="TxtEstado" Grid.Row="3" Grid.ColumnSpan="2" Foreground="#8C8FA5"
-                       Margin="22,6,22,10" FontSize="12.5"/>
+            <!-- Barra de estado: muestra el resultado de la última acción -->
+            <TextBlock x:Name="TxtEstado" Grid.Row="3" Foreground="#8C8FA5"
+                       Margin="24,6,24,10" FontSize="12.5"/>
         </Grid>
 
-        <!-- =====================================================
-             VENTANA "BLOQUEO" (según el dibujo):
-             Inicio / Fin con desplegable de fecha, desplegable de motivo,
-             y botones Cancelar / Bloquear
-             ===================================================== -->
+        <!-- Ventana "Bloqueo": elegir rango (Inicio/Fin) y motivo, y bloquear o desbloquear.
+             Está dentro de esta ventana y tapa el calendario mientras está abierta -->
         <Grid x:Name="Overlay" Background="#B0000000" Visibility="Collapsed">
             <Border Width="500" CornerRadius="16" Background="#F7F8FC" Padding="28,24,28,26"
                     HorizontalAlignment="Center" VerticalAlignment="Center">
@@ -237,7 +160,7 @@
                                Foreground="#6B6E85" TextWrapping="Wrap" MinHeight="34"/>
 
                     <Grid Margin="0,22,0,0">
-                        <!-- Solo aparece si en el rango hay días ocupados/festivos -->
+                        <!-- Solo aparece si en el rango hay días ocupados o festivos -->
                         <Button x:Name="BtnDlgDesbloquear" Style="{StaticResource Boton}"
                                 Background="#FCE4E4" Foreground="#C62828" Content="Desbloquear"
                                 Width="140" Height="44" HorizontalAlignment="Left"
